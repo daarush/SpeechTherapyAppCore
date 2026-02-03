@@ -152,6 +152,8 @@ MonoBehaviour:
   phonemeInput: {fileID: 378026470}
   vowelInput: {fileID: 826668908}
   lengthInput: {fileID: 895164318}
+  outputText: {fileID: 2114693911}
+  recordingDuration: 5
 --- !u!4 &13005646
 Transform:
   m_ObjectHideFlags: 0
@@ -481,6 +483,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 87934873}
   m_CullTransparentMesh: 1
+--- !u!1 &101650528
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 101650530}
+  - component: {fileID: 101650529}
+  m_Layer: 0
+  m_Name: 'Wav2VecManager '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &101650529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 101650528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6fad81cc3ecff34fab9c0f545abfd19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Wav2VecManager
+  wav2vecModel: {fileID: 5022602860645237092, guid: 78edc7f732102064aa5de2299e7d3403, type: 3}
+--- !u!4 &101650530
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 101650528}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 627.3928, y: 293.62128, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &375984553
 GameObject:
   m_ObjectHideFlags: 0
@@ -2365,7 +2412,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 375984555}
   m_HandleRect: {fileID: 375984554}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3289,6 +3336,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1791879357}
   m_CullTransparentMesh: 1
+--- !u!1 &1862800907
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1862800909}
+  - component: {fileID: 1862800908}
+  m_Layer: 0
+  m_Name: 'VoiceRecorder '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1862800908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1862800907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c628e2c85cd0b87439167da1d3dcdad7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VoiceRecorder
+--- !u!4 &1862800909
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1862800907}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 627.3928, y: 293.62128, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1871449606
 GameObject:
   m_ObjectHideFlags: 0
@@ -3872,7 +3963,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0004882043, y: 0.00057934126}
+  m_AnchoredPosition: {x: 0.0004882043, y: 0.000036878642}
   m_SizeDelta: {x: -0.00042725, y: 975}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2114693911
@@ -3897,16 +3988,16 @@ MonoBehaviour:
       m_Calls: []
   m_text: '___________
 
-    
+
 
     Chosen Word: [X]
 
-    Converted Target Word
-    to phonemes: [aaa bbb ccc]
+    Converted Target Word to phonemes:
+    [aaa bbb ccc]
 
     Spoken word to phonemes: [aaa bbb ccc]
 
-    
+
 
     PHONEME_EDIT_WEIGHT
     = 70
@@ -3915,10 +4006,10 @@ MonoBehaviour:
 
     LENGTH_WEIGHT  = 15
 
-    
 
-    Total Score
-    (out of 100) = 100%
+
+    Total Score (out
+    of 100) = 100%
 
     Total Time: 0s
 
@@ -4012,3 +4103,5 @@ SceneRoots:
   - {fileID: 1653016383}
   - {fileID: 1145962762}
   - {fileID: 13005646}
+  - {fileID: 1862800909}
+  - {fileID: 101650530}
