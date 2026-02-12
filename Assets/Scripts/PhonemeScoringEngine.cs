@@ -5,6 +5,55 @@ using UnityEngine;
 
 public static class PhonemeScoringEngine
 {
+    
+    public struct ScoreBreakdown
+    {
+        public float phonemeRaw;   // 0–1
+        public float vowelRaw;     // 0–1
+        public float lengthRaw;    // 0–1
+
+        public float phonemeWeighted; // 0–100
+        public float vowelWeighted;   // 0–100
+        public float lengthWeighted;  // 0–100
+
+        public float total;        // 0–100
+    }
+
+    public static ScoreBreakdown CalculateSimilarityDetailed(
+        string spokenPhonemes,
+        string targetPhonemes
+    )
+    {
+        var spokenTokens = Tokenize(spokenPhonemes);
+        var targetTokens = Tokenize(targetPhonemes);
+
+        if (spokenTokens.Length == 0 || targetTokens.Length == 0)
+            return default;
+
+        float editSim  = PhonemeEditSimilarity(spokenTokens, targetTokens);
+        float vowelSim = VowelSimilarity(spokenTokens, targetTokens);
+        float lenPen   = LengthPenalty(spokenTokens, targetTokens);
+
+        ScoreBreakdown result = new ScoreBreakdown
+        {
+            phonemeRaw = editSim,
+            vowelRaw   = vowelSim,
+            lengthRaw  = lenPen,
+
+            phonemeWeighted = editSim  * MAIN_WEIGHT   * 100f,
+            vowelWeighted   = vowelSim * VOWEL_WEIGHT  * 100f,
+            lengthWeighted  = lenPen   * LENGTH_WEIGHT * 100f,
+        };
+
+        result.total =
+            result.phonemeWeighted +
+            result.vowelWeighted +
+            result.lengthWeighted;
+
+        return result;
+    }
+    
+
     // Weight configuration (configurable at runtime)
     private static float MAIN_WEIGHT = 0.70f;  // phoneme Levenshtein
     private static float VOWEL_WEIGHT = 0.15f;  // vowel similarity

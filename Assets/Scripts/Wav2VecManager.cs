@@ -36,12 +36,19 @@ public class Wav2VecManager : MonoBehaviour
     }
 
     // Modified function to return score, spoken phonemes, and target phonemes via callback
-    public void GetScoreFromFile(string recordingPath, string targetWord, Action<float, string, string> onScoreReady)
-    {
-        StartCoroutine(LoadClipAndScore(recordingPath, targetWord, onScoreReady));
+    public void GetScoreFromFile(
+        string recordingPath,
+        string targetWord,
+        Action<PhonemeScoringEngine.ScoreBreakdown, string, string> onScoreReady
+    ) {
+    StartCoroutine(LoadClipAndScore(recordingPath, targetWord, onScoreReady));
     }
 
-    private IEnumerator LoadClipAndScore(string path, string targetWord, Action<float, string, string> onScoreReady)
+    private IEnumerator LoadClipAndScore(
+        string path,
+        string targetWord,
+        Action<PhonemeScoringEngine.ScoreBreakdown, string, string> onScoreReady
+    )
     {
         using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip("file:///" + path, AudioType.WAV))
         {
@@ -50,7 +57,7 @@ public class Wav2VecManager : MonoBehaviour
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError("Failed to load audio: " + www.error);
-                onScoreReady?.Invoke(-1f, "", ""); // return -1 on failure
+                onScoreReady?.Invoke(default, "", "");// return -1 on failure
                 yield break;
             }
 
@@ -64,12 +71,14 @@ public class Wav2VecManager : MonoBehaviour
             Debug.Log($"Predicted Phonemes: {predictedPhonemes}");
             Debug.Log($"Target Phonemes: {targetPhonemes}");
 
-            float score = PhonemeScoringEngine.CalculateSimilarity(predictedPhonemes, targetPhonemes);
+            var breakdown =  PhonemeScoringEngine.CalculateSimilarityDetailed(
+                predictedPhonemes,
+                targetPhonemes
+            );
 
-            Debug.Log($"Similarity Score: {score}");
+            Debug.Log($"Similarity Score: {breakdown.total:F2}");
 
-            // Return the score and phonemes via callback
-            onScoreReady?.Invoke(score, predictedPhonemes, targetPhonemes);
+            onScoreReady?.Invoke(breakdown, predictedPhonemes, targetPhonemes);
             
             // Dispose the wav2vec instance
             wav2vec.Dispose();

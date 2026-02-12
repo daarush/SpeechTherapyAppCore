@@ -23,9 +23,16 @@ public class FirstSceneController : MonoBehaviour
     void Start()
     {
         // Set default values (70, 15, 15)
+        if (outputText != null) outputText.text = "";
         if (phonemeInput != null) phonemeInput.text = "70";
         if (vowelInput != null) vowelInput.text = "15";
         if (lengthInput != null) lengthInput.text = "15";
+
+        if (outputText != null)
+        {
+            outputText.text = PlayerPrefs.GetString("OUTPUT_LOG", "");
+            StartCoroutine(ScrollToBottom()); // scroll to bottom on scene load
+        }
     }
 
     public void OnStartPressed()
@@ -105,15 +112,19 @@ public class FirstSceneController : MonoBehaviour
 
         // Process audio and get score
         bool scoreReceived = false;
-        float finalScore = 0f;
+        PhonemeScoringEngine.ScoreBreakdown breakdown = default;
         string spokenPhonemes = "";
 
-        Wav2VecManager.Instance.GetScoreFromFile(recordingPath, targetWord, (score, spoken, target) =>
-        {
-            finalScore = score;
-            spokenPhonemes = spoken;
-            scoreReceived = true;
-        });
+        Wav2VecManager.Instance.GetScoreFromFile(
+            recordingPath,
+            targetWord,
+            (result, spoken, target) =>
+            {
+                breakdown = result;
+                spokenPhonemes = spoken;
+                scoreReceived = true;
+            }
+        );
 
         // Wait for score calculation
         float timeout = 30f;
@@ -128,27 +139,53 @@ public class FirstSceneController : MonoBehaviour
         {
             AppendOutput("ERROR: Timeout waiting for score calculation!");
             isProcessing = false;
+            
             yield break;
         }
 
         // Calculate total processing time
         float totalTime = Time.time - startTime;
 
+        //final score access now
+        float finalScore = breakdown.total;
+
+        phonemeInput.text = $"{phonemeWeight * 100f:F0} → {breakdown.phonemeWeighted:F1}";
+        vowelInput.text   = $"{vowelWeight * 100f:F0} → {breakdown.vowelWeighted:F1}";
+        lengthInput.text  = $"{lengthWeight * 100f:F0} → {breakdown.lengthWeighted:F1}";
+
         // Format and display results (show original 0-100 scale values)
         string resultText = $"\n___________\n" +
-                           $"Chosen Word: {targetWord}\n" +
-                           $"Converted Target Word to phonemes: [{targetPhonemes}]\n" +
-                           $"Spoken word to phonemes: [{spokenPhonemes}]\n" +
-                           $"PHONEME_EDIT_WEIGHT = {phonemeWeight * 100f:F0}\n" +
-                           $"VOWEL_WEIGHT = {vowelWeight * 100f:F0}\n" +
-                           $"LENGTH_WEIGHT = {lengthWeight * 100f:F0}\n" +
-                           $"Total Score (out of 100) = {finalScore:F2}%\n" +
-                           $"Total Time: {totalTime:F1}s\n" +
-                           $"___________\n";
+                    $"Chosen Word: {targetWord}\n" +
+                    $"Converted Target Word to phonemes: [{targetPhonemes}]\n" +
+                    $"Spoken word to phonemes: [{spokenPhonemes}]\n\n" +
+
+                    $"PHONEME_EDIT_WEIGHT = {phonemeWeight * 100f:F0}%  →  {breakdown.phonemeWeighted:F1}\n" +
+                    $"VOWEL_WEIGHT        = {vowelWeight * 100f:F0}%  →  {breakdown.vowelWeighted:F1}\n" +
+                    $"LENGTH_WEIGHT       = {lengthWeight * 100f:F0}%  →  {breakdown.lengthWeighted:F1}\n\n" +
+
+                    $"Total Score (out of 100) = {finalScore:F2}%\n" +
+                    $"Total Time: {totalTime:F1}s\n" +
+                    $"___________\n";
+
 
         AppendOutput(resultText);
 
+        // Save both original weight (0-100) and weighted score
+        PlayerPrefs.SetString("WORD", targetWord);
+
+        // Original weights
+        PlayerPrefs.SetFloat("PHONEME_ORIG", phonemeWeight * 100f);
+        PlayerPrefs.SetFloat("VOWEL_ORIG", vowelWeight * 100f);
+        PlayerPrefs.SetFloat("LENGTH_ORIG", lengthWeight * 100f);
+
+        // Weighted results
+        PlayerPrefs.SetFloat("PHONEME_WEIGHTED", breakdown.phonemeWeighted);
+        PlayerPrefs.SetFloat("VOWEL_WEIGHTED", breakdown.vowelWeighted);
+        PlayerPrefs.SetFloat("LENGTH_WEIGHTED", breakdown.lengthWeighted);
+
+        PlayerPrefs.Save();
         isProcessing = false;
+        SceneManager.LoadScene("SecondScene");
     }
 
     private void AppendOutput(string text)
@@ -156,8 +193,36 @@ public class FirstSceneController : MonoBehaviour
         if (outputText != null)
         {
             outputText.text += text + "\n";
+            PlayerPrefs.SetString("OUTPUT_LOG", outputText.text);
+            PlayerPrefs.Save();
+            StartCoroutine(ScrollToBottom());
+
+            // Scroll to bottom if using a ScrollRect
+            var scrollRect = outputText.GetComponentInParent<UnityEngine.UI.ScrollRect>();
+            if (scrollRect != null)
+            {
+                Canvas.ForceUpdateCanvases();
+                scrollRect.verticalNormalizedPosition = 0f; // scroll to bottom
+                Canvas.ForceUpdateCanvases();
+            }
         }
         Debug.Log(text);
+    }
+
+    private IEnumerator ScrollToBottom()
+    {
+        yield return null; // wait one frame for TMP text to update
+
+        var scrollRect = outputText.GetComponentInParent<UnityEngine.UI.ScrollRect>();
+        if (scrollRect != null)
+        {
+            // Force TMP to rebuild its layout
+            Canvas.ForceUpdateCanvases();
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(scrollRect.content);
+
+            scrollRect.verticalNormalizedPosition = 0f; // scroll to bottom
+            Canvas.ForceUpdateCanvases();
+        }
     }
 
     private float ParseFloat(TMP_InputField input)
@@ -179,6 +244,7 @@ public class FirstSceneController : MonoBehaviour
         if (outputText != null)
         {
             outputText.text = "";
+            PlayerPrefs.DeleteKey("OUTPUT_LOG");
         }
     }
 }
